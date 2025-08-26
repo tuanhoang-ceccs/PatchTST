@@ -97,6 +97,111 @@ class Dataset_ETT_hour(Dataset):
 
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
+    
+class Dataset_VN_Energy_hour(Dataset):
+    def __init__(self, root_path, flag='train', size=None,
+                 features='S', data_path='VN_Energy.csv',
+                 target='MB_MW', scale=True, timeenc=0, freq='h',
+                 train_end="2024-12-31 23:00:00",  # configurable
+                 val_ratio=0.5):  # how to split 2025+ into val/test
+        # size [seq_len, label_len, pred_len]
+        if size is None:
+            self.seq_len = 24 * 4 * 4
+            self.label_len = 24 * 4
+            self.pred_len = 24 * 4
+        else:
+            self.seq_len = size[0]
+            self.label_len = size[1]
+            self.pred_len = size[2]
+
+        assert flag in ['train', 'test', 'val']
+        type_map = {'train': 0, 'val': 1, 'test': 2}
+        self.set_type = type_map[flag]
+
+        self.features = features
+        self.target = target
+        self.scale = scale
+        self.timeenc = timeenc
+        self.freq = freq
+        self.train_end = pd.Timestamp(train_end)
+        self.val_ratio = val_ratio
+
+        self.root_path = root_path
+        self.data_path = data_path
+        self.__read_data__()
+
+    def __read_data__(self):
+        self.scaler = StandardScaler()
+        df_raw = pd.read_csv(os.path.join(self.root_path, self.data_path))
+        df_raw['date'] = pd.to_datetime(df_raw['date'])
+
+        # split by date
+        train_idx = df_raw[df_raw['date'] <= self.train_end].index
+        valtest_idx = df_raw[df_raw['date'] > self.train_end].index
+
+        if len(valtest_idx) == 0:
+            raise ValueError("No data available after train_end date!")
+
+        # split val/test inside 2025+ part
+        mid = int(len(valtest_idx) * self.val_ratio)
+        if self.set_type == 0:  # train
+            border1, border2 = train_idx[0], train_idx[-1] + 1
+        elif self.set_type == 1:  # val
+            border1, border2 = valtest_idx[0], valtest_idx[mid]
+        else:  # test
+            border1, border2 = valtest_idx[mid], valtest_idx[-1] + 1
+
+        # feature selection
+        if self.features in ['M', 'MS']:
+            cols_data = df_raw.columns[1:]
+            df_data = df_raw[cols_data]
+        else:  # 'S'
+            df_data = df_raw[[self.target]]
+
+        # scale (fit only on train)
+        if self.scale:
+            train_data = df_data.iloc[train_idx[0]:train_idx[-1] + 1]
+            self.scaler.fit(train_data.values)
+            data = self.scaler.transform(df_data.values)
+        else:
+            data = df_data.values
+
+        # timestamps
+        df_stamp = df_raw[['date']].iloc[border1:border2]
+        if self.timeenc == 0:
+            df_stamp['month'] = df_stamp.date.dt.month
+            df_stamp['day'] = df_stamp.date.dt.day
+            df_stamp['weekday'] = df_stamp.date.dt.weekday
+            df_stamp['hour'] = df_stamp.date.dt.hour
+            data_stamp = df_stamp.drop(['date'], axis=1).values
+        else:
+            # FIX: use DatetimeIndex, not numpy array
+            data_stamp = time_features(pd.DatetimeIndex(df_stamp['date']), freq=self.freq).transpose(1, 0)
+
+        # assign
+        self.data_x = data[border1:border2]
+        self.data_y = data[border1:border2]
+        self.data_stamp = data_stamp
+
+    def __getitem__(self, index):
+        s_begin = index
+        s_end = s_begin + self.seq_len
+        r_begin = s_end - self.label_len
+        r_end = r_begin + self.label_len + self.pred_len
+
+        seq_x = self.data_x[s_begin:s_end]
+        seq_y = self.data_y[r_begin:r_end]
+        seq_x_mark = self.data_stamp[s_begin:s_end]
+        seq_y_mark = self.data_stamp[r_begin:r_end]
+
+        return seq_x, seq_y, seq_x_mark, seq_y_mark
+
+    def __len__(self):
+        return len(self.data_x) - self.seq_len - self.pred_len + 1
+
+    def inverse_transform(self, data):
+        return self.scaler.inverse_transform(data)
+
 
 
 class Dataset_ETT_minute(Dataset):
