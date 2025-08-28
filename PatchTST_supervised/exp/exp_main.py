@@ -16,6 +16,7 @@ import time
 import warnings
 import matplotlib.pyplot as plt
 import numpy as np
+# import pandas as pd
 
 warnings.filterwarnings('ignore')
 
@@ -365,3 +366,62 @@ class Exp_Main(Exp_Basic):
         np.save(folder_path + 'real_prediction.npy', preds)
 
         return
+    
+    # def rolling_predict(self, setting, end_date=None):
+    #     # 1. Load full dataset (giữ scaler, datetime index)
+    #     full_data, _ = self._get_data(flag='pred')
+    #     print(full_data.data_x.shape)
+    #     scaler = full_data.scaler
+    #     df_hist = full_data.raw_df.copy()
+    #     print(df_hist.shape)
+    #     df_hist['date'] = pd.to_datetime(df_hist['date'])
+    #     df_hist = df_hist.set_index('date')
+
+    #     # 2. Load model
+    #     path = os.path.join(self.args.checkpoints, setting)
+    #     best_model_path = path + '/' + 'checkpoint.pth'
+    #     self.model.load_state_dict(torch.load(best_model_path, map_location=self.device))
+    #     self.model.eval()
+
+    #     seq_len = self.args.seq_len
+    #     pred_len = self.args.pred_len
+    #     history = full_data.data_x  # (T,D)
+    #     history = history[-seq_len:, :] # lấy last seq để khởi động
+
+    #     preds = []
+    #     last_date = df_hist.index[-1]
+    #     end_date = pd.to_datetime(end_date)
+
+    #     with torch.no_grad():
+    #         while last_date < end_date:
+    #             batch_x = torch.tensor(history[-seq_len:, :]).unsqueeze(0).float().to(self.device)
+    #             output = self.model(batch_x)
+    #             output = output[:, -pred_len:, :].detach().cpu().numpy()
+
+    #             preds.append(output)
+    #             history = np.concatenate([history, output[0]], axis=0)
+
+    #             new_dates = pd.date_range(start=last_date + pd.Timedelta(hours=1),
+    #                                       periods=pred_len, freq="H")
+    #             last_date = new_dates[-1]
+
+    #     preds = np.concatenate(preds, axis=1).squeeze(0)
+    #     preds_real = scaler.inverse_transform(preds)
+
+    #     all_dates = pd.date_range(df_hist.index[-1] + pd.Timedelta(hours=1),
+    #                               periods=preds.shape[0], freq="H")
+    #     df_preds = pd.DataFrame(preds_real, index=all_dates, columns=df_hist.columns)
+
+    #     # save
+    #     folder_path = './results/' + setting + '/'
+    #     os.makedirs(folder_path, exist_ok=True)
+    #     df_preds.to_csv(folder_path + f'rolling_pred_{seq_len}_{pred_len}_until_{end_date.date()}.csv')
+
+    #     return df_preds
+
+
+
+# exp = Exp_Main(args)
+# rolling_forecast = exp.rolling_predict(setting="PatchTST_VN_Energy_336_336",
+#                                        data=my_numpy_data,  # dữ liệu full
+#                                        horizon=24*365)      # 1 năm

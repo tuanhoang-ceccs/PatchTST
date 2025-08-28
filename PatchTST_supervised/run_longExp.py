@@ -71,6 +71,8 @@ if __name__ == '__main__':
     parser.add_argument('--activation', type=str, default='gelu', help='activation')
     parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
     parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
+    # parser.add_argument('--do_rolling_predict', action='store_true', help='whether to do rolling prediction')
+    # parser.add_argument('--end_date', type=str, default=None, help='end date for rolling prediction (yyyy-mm-dd)')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
@@ -146,7 +148,10 @@ if __name__ == '__main__':
                 print('>>>>>>>predicting : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
                 exp.predict(setting, True)
 
-            torch.cuda.empty_cache()
+            # if args.do_rolling_predict:
+            #     print('>>>>>>>rolling predicting : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+            #     exp.rolling_predict(setting, horizon=args.horizon)
+            # torch.cuda.empty_cache()
     else:
         ii = 0
         setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}'.format(args.model_id,
@@ -173,5 +178,9 @@ if __name__ == '__main__':
         if args.do_predict:
             print('>>>>>>>predicting : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
             exp.predict(setting, True)
+
+        # if args.do_rolling_predict:
+        #     print('>>>>>>>rolling predicting : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+        #     exp.rolling_predict(setting, end_date=args.end_date)
         torch.cuda.empty_cache()
         

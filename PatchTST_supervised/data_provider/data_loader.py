@@ -135,21 +135,30 @@ class Dataset_VN_Energy_hour(Dataset):
         df_raw = pd.read_csv(os.path.join(self.root_path, self.data_path))
         df_raw['date'] = pd.to_datetime(df_raw['date'])
 
-        # split by date
-        train_idx = df_raw[df_raw['date'] <= self.train_end].index
-        valtest_idx = df_raw[df_raw['date'] > self.train_end].index
+        # # split by date
+        # train_idx = df_raw[df_raw['date'] <= self.train_end].index
+        # valtest_idx = df_raw[df_raw['date'] > self.train_end].index
 
-        if len(valtest_idx) == 0:
-            raise ValueError("No data available after train_end date!")
+        # if len(valtest_idx) == 0:
+        #     raise ValueError("No data available after train_end date!")
 
-        # split val/test inside 2025+ part
-        mid = int(len(valtest_idx) * self.val_ratio)
-        if self.set_type == 0:  # train
-            border1, border2 = train_idx[0], train_idx[-1] + 1
-        elif self.set_type == 1:  # val
-            border1, border2 = valtest_idx[0], valtest_idx[mid]
-        else:  # test
-            border1, border2 = valtest_idx[mid], valtest_idx[-1] + 1
+        # # split val/test inside 2025+ part
+        # mid = int(len(valtest_idx) * self.val_ratio)
+        # if self.set_type == 0:  # train
+        #     border1, border2 = train_idx[0], train_idx[-1] + 1
+        # elif self.set_type == 1:  # val
+        #     border1, border2 = valtest_idx[0], valtest_idx[mid]
+        # else:  # test
+        #     border1, border2 = valtest_idx[mid], valtest_idx[-1] + 1
+
+        num_train = int(len(df_raw) * 0.7)
+        num_test = int(len(df_raw) * 0.2)
+        num_val = len(df_raw) - num_train - num_test
+
+        border1s = [0, num_train - self.seq_len, len(df_raw) - num_test - self.seq_len]
+        border2s = [num_train, num_train + num_val, len(df_raw)]
+        border1 = border1s[self.set_type]
+        border2 = border2s[self.set_type]
 
         # feature selection
         if self.features in ['M', 'MS']:
@@ -160,7 +169,7 @@ class Dataset_VN_Energy_hour(Dataset):
 
         # scale (fit only on train)
         if self.scale:
-            train_data = df_data.iloc[train_idx[0]:train_idx[-1] + 1]
+            train_data = df_data.iloc[border1s[0]:border2s[-1] + 1]
             self.scaler.fit(train_data.values)
             data = self.scaler.transform(df_data.values)
         else:
