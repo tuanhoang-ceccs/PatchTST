@@ -435,7 +435,7 @@ class Exp_Main(Exp_Basic):
         end_date = pd.to_datetime(end_date)
 
         with torch.no_grad():
-            while last_date < end_date:
+            while last_date < end_date + pd.Timedelta(hours=pred_len):
                 batch_x = torch.tensor(
                     history[-seq_len:, :]).unsqueeze(0).float().to(self.device)
                 output = self.model(batch_x)
