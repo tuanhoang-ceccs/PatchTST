@@ -421,6 +421,7 @@ class Exp_Main(Exp_Basic):
         # 2. Load model
         path = os.path.join(self.args.checkpoints, setting)
         best_model_path = path + '/' + 'checkpoint.pth'
+        print(best_model_path)
         self.model.load_state_dict(torch.load(
             best_model_path, map_location=self.device))
         self.model.eval()
@@ -435,7 +436,7 @@ class Exp_Main(Exp_Basic):
         end_date = pd.to_datetime(end_date)
 
         with torch.no_grad():
-            while last_date < end_date + pd.Timedelta(hours=pred_len):
+            while last_date < end_date + pd.Timedelta(hours=24):
                 batch_x = torch.tensor(
                     history[-seq_len:, :]).unsqueeze(0).float().to(self.device)
                 output = self.model(batch_x)
@@ -456,6 +457,9 @@ class Exp_Main(Exp_Basic):
         df_preds = pd.DataFrame(
             preds_real, index=all_dates, columns=df_hist.columns)
 
+        # Only keep predictions up to and including end_date
+        df_preds = df_preds[df_preds.index < end_date + pd.Timedelta(hours=24)]
+
         # save
         folder_path = './results/' + setting + '/'
         os.makedirs(folder_path, exist_ok=True)
@@ -464,8 +468,3 @@ class Exp_Main(Exp_Basic):
 
         return df_preds
 
-
-# exp = Exp_Main(args)
-# rolling_forecast = exp.rolling_predict(setting="PatchTST_VN_Energy_336_336",
-#                                        data=my_numpy_data,  # dữ liệu full
-#                                        horizon=24*365)      # 1 năm
