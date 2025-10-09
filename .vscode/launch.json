@@ -107,7 +107,7 @@
                 "--itr", "1",
                 "--batch_size", "64",
                 "--learning_rate", "0.0005",
-                "--end_date", "2030-12-31",
+                "--end_date", "2050-12-31",
             ]
         },
         {
@@ -145,7 +145,7 @@
                 "--itr", "1",
                 "--batch_size", "64",
                 "--learning_rate", "0.0001",
-                "--end_date", "2030-12-31"
+                "--end_date", "2050-12-31"
             ]
         },
         {
@@ -183,7 +183,7 @@
                 "--itr", "1",
                 "--batch_size", "64",
                 "--learning_rate", "0.0001",
-                "--end_date", "2030-12-31"
+                "--end_date", "2050-12-31"
             ]
         },
         {
@@ -221,7 +221,45 @@
                 "--itr", "1",
                 "--batch_size", "64",
                 "--learning_rate", "0.0001",
-                "--end_date", "2030-12-31"
+                "--end_date", "2050-12-31"
+            ]
+        },
+        {
+            "name": "Rolling Predict PatchTST VN_Energy 72 - 24 - 100 (M mode)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "run_longExp.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/PatchTST_supervised",
+            "args": [
+                "--random_seed", "2021",
+                "--is_training", "0",
+                "--do_rolling_predict",
+                "--root_path", "./dataset/",
+                "--data_path", "VN_Energy.csv",
+                "--model_id", "VN_Energy_72_24_100",
+                "--model", "PatchTST",
+                "--data", "VN_Energy",
+                "--features", "M",
+                "--target", "HT_MW",
+                "--seq_len", "72",
+                "--pred_len", "24",
+                "--enc_in", "1",
+                "--e_layers", "3",
+                "--n_heads", "4",
+                "--d_model", "16",
+                "--d_ff", "128",
+                "--dropout", "0.3",
+                "--fc_dropout", "0.3",
+                "--head_dropout", "0",
+                "--patch_len", "16",
+                "--stride", "8",
+                "--des", "Exp",
+                "--train_epochs", "100",
+                "--itr", "1",
+                "--batch_size", "64",
+                "--learning_rate", "0.0001",
+                "--end_date", "2050-12-31"
             ]
         },
         {
@@ -261,6 +299,44 @@
             ]
         },
         {
+            "name": "Rolling Predict PatchTST VN_Energy 4320 - 720 - 5 (M mode)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "run_longExp.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/PatchTST_supervised",
+            "args": [
+                "--random_seed", "2021",
+                "--is_training", "0",
+                "--do_rolling_predict",
+                "--root_path", "./dataset/",
+                "--data_path", "VN_Energy.csv",
+                "--model_id", "VN_Energy_4320_720_5",
+                "--model", "PatchTST",
+                "--data", "VN_Energy",
+                "--features", "M",
+                "--target", "HT_MW",
+                "--seq_len", "4320",
+                "--pred_len", "720",
+                "--enc_in", "1",
+                "--e_layers", "3",
+                "--n_heads", "4",
+                "--d_model", "16",
+                "--d_ff", "128",
+                "--dropout", "0.3",
+                "--fc_dropout", "0.3",
+                "--head_dropout", "0",
+                "--patch_len", "16",
+                "--stride", "8",
+                "--des", "Exp",
+                "--train_epochs", "5",
+                "--itr", "1",
+                "--batch_size", "64",
+                "--learning_rate", "0.0001",
+                "--end_date", "2050-12-31"
+            ]
+        },
+        {
             "name": "Rolling Predict PatchTST VN_Energy 4320 - 720 - 100 (M mode)",
             "type": "debugpy",
             "request": "launch",
@@ -295,7 +371,7 @@
                 "--itr", "1",
                 "--batch_size", "64",
                 "--learning_rate", "0.0001",
-                "--end_date", "2030-12-31"
+                "--end_date", "2050-12-31"
             ]
         },
         {
@@ -333,7 +409,7 @@
                 "--itr", "1",
                 "--batch_size", "64",
                 "--learning_rate", "0.0001",
-                "--end_date", "2030-12-31"
+                "--end_date", "2050-12-31"
             ]
         }
     ]
